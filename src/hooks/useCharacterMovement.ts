@@ -6,16 +6,17 @@ interface MovementState {
   position: THREE.Vector3;
   rotation: THREE.Euler;
   velocity: THREE.Vector3;
+  isMoving: boolean;
 }
 
 const MOVEMENT_SPEED = 0.1;
 const ROTATION_SPEED = 0.1;
-const CAMERA_OFFSET = new THREE.Vector3(0, 3, 8); // 카메라 높이와 거리 증가
+const CAMERA_OFFSET = new THREE.Vector3(10, 2.5, 6); // 카메라 높이와 거리 조정
 const CAMERA_SMOOTHING = 0.05; // 카메라 부드러움 정도 조절
 const CAMERA_ROTATION_SPEED = 0.02;
 const CAMERA_HEIGHT_SPEED = 0.1;
-const MIN_CAMERA_HEIGHT = 1;
-const MAX_CAMERA_HEIGHT = 10;
+const MIN_CAMERA_HEIGHT = 1.5;
+const MAX_CAMERA_HEIGHT = 6;
 
 export const useCharacterMovement = (initialPosition = [0, 0, 0]) => {
   const { camera } = useThree();
@@ -23,6 +24,7 @@ export const useCharacterMovement = (initialPosition = [0, 0, 0]) => {
     position: new THREE.Vector3(...initialPosition),
     rotation: new THREE.Euler(0, Math.PI, 0),
     velocity: new THREE.Vector3(),
+    isMoving: false,
   });
 
   const [movement, setMovement] = useState<MovementState>(movementRef.current);
@@ -31,6 +33,14 @@ export const useCharacterMovement = (initialPosition = [0, 0, 0]) => {
   const cameraTargetRef = useRef(new THREE.Vector3());
   const cameraAngleRef = useRef(0);
   const cameraHeightRef = useRef(CAMERA_OFFSET.y);
+
+  // 초기 카메라 위치 설정
+  useEffect(() => {
+    const initialCameraPos = new THREE.Vector3(...initialPosition).add(CAMERA_OFFSET);
+    camera.position.copy(initialCameraPos);
+    cameraTargetRef.current.copy(initialCameraPos);
+    camera.lookAt(new THREE.Vector3(...initialPosition));
+  }, [camera, initialPosition]);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -116,6 +126,7 @@ export const useCharacterMovement = (initialPosition = [0, 0, 0]) => {
         position: newPosition,
         rotation: movementRef.current.rotation,
         velocity: direction,
+        isMoving: direction.lengthSq() > 0,
       };
 
       setMovement({ ...movementRef.current });
@@ -150,5 +161,6 @@ export const useCharacterMovement = (initialPosition = [0, 0, 0]) => {
     position: [movement.position.x, movement.position.y, movement.position.z] as [number, number, number],
     rotation: [movement.rotation.x, movement.rotation.y, movement.rotation.z] as [number, number, number],
     velocity: [movement.velocity.x, movement.velocity.y, movement.velocity.z] as [number, number, number],
+    isMoving: movement.isMoving,
   };
 }; 
