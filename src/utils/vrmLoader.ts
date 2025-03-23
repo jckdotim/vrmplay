@@ -2,9 +2,9 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { VRMLoaderPlugin } from '@pixiv/three-vrm';
 import * as THREE from 'three';
 
-export const loadVRM = async (url: string) => {
+export const loadVRM = async (url: string): Promise<THREE.Object3D> => {
   const loader = new GLTFLoader();
-  loader.register((parser) => new VRMLoaderPlugin(parser));
+  loader.register((parser: any) => new VRMLoaderPlugin(parser));
   
   const gltf = await loader.loadAsync(url);
   const vrm = gltf.userData.vrm;

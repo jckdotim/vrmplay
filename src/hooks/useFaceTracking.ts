@@ -1,48 +1,82 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { FaceMesh } from '@mediapipe/face_mesh';
-import { FaceTrackingState } from '../types/vrm';
+import { VRM } from '@pixiv/three-vrm';
 
-export const useFaceTracking = () => {
-  const [trackingState, setTrackingState] = useState<FaceTrackingState>({
-    isTracking: false,
-    blendShapes: {},
-    headRotation: [0, 0, 0],
-  });
-
-  const videoRef = useRef<HTMLVideoElement>(null);
+export const useFaceTracking = (vrm: VRM | null) => {
   const faceMeshRef = useRef<FaceMesh | null>(null);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
 
   useEffect(() => {
-    const initializeFaceMesh = async () => {
-      const faceMesh = new FaceMesh({
-        locateFile: (file) => {
-          return `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`;
-        },
-      });
+    if (!vrm) return;
 
-      faceMesh.setOptions({
-        maxNumFaces: 1,
-        refineLandmarks: true,
-        minDetectionConfidence: 0.5,
-        minTrackingConfidence: 0.5,
-      });
+    const faceMesh = new FaceMesh({
+      locateFile: (file) => {
+        return `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`;
+      },
+    });
 
-      faceMesh.onResults((results) => {
-        if (results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0) {
-          const landmarks = results.multiFaceLandmarks[0];
-          // TODO: Convert landmarks to blend shapes and head rotation
-          setTrackingState({
-            isTracking: true,
-            blendShapes: {},
-            headRotation: [0, 0, 0],
-          });
-        } else {
-          setTrackingState(prev => ({ ...prev, isTracking: false }));
+    faceMesh.setOptions({
+      maxNumFaces: 1,
+      refineLandmarks: true,
+      minDetectionConfidence: 0.5,
+      minTrackingConfidence: 0.5,
+    });
+
+    faceMesh.onResults((results) => {
+      if (!results.multiFaceLandmarks || results.multiFaceLandmarks.length === 0) return;
+
+      const faceLandmarks = results.multiFaceLandmarks[0];
+      if (!faceLandmarks) return;
+
+      // Update VRM face rotation
+      const nose = faceLandmarks[5];
+      const leftEye = faceLandmarks[33];
+      const rightEye = faceLandmarks[263];
+
+      // Calculate face direction
+      const faceDirection = {
+        x: (nose.x - 0.5) * 2,
+        y: (nose.y - 0.5) * 2,
+        z: (nose.z - 0.5) * 2,
+      };
+
+      // Update VRM rotation
+      vrm.rotation.y = faceDirection.x * Math.PI;
+      vrm.rotation.x = faceDirection.y * Math.PI;
+      vrm.rotation.z = faceDirection.z * Math.PI;
+
+      // Update VRM eye rotation
+      const eyeRotation = {
+        x: (leftEye.y - rightEye.y) * 2,
+        y: (leftEye.x - rightEye.x) * 2,
+      };
+
+      // Update VRM eye bones
+      if (vrm.humanoid) {
+        const leftEyeBone = vrm.humanoid.getNormalizedBoneNode('leftEye');
+        const rightEyeBone = vrm.humanoid.getNormalizedBoneNode('rightEye');
+
+        if (leftEyeBone) {
+          leftEyeBone.rotation.x = eyeRotation.x;
+          leftEyeBone.rotation.y = eyeRotation.y;
         }
-      });
 
-      faceMeshRef.current = faceMesh;
+        if (rightEyeBone) {
+          rightEyeBone.rotation.x = eyeRotation.x;
+          rightEyeBone.rotation.y = eyeRotation.y;
+        }
+      }
+    });
+
+    faceMeshRef.current = faceMesh;
+
+    return () => {
+      faceMesh.close();
     };
+  }, [vrm]);
+
+  useEffect(() => {
+    if (!faceMeshRef.current) return;
 
     const startCamera = async () => {
       try {
@@ -55,30 +89,26 @@ export const useFaceTracking = () => {
       }
     };
 
-    initializeFaceMesh();
     startCamera();
 
     return () => {
       if (videoRef.current?.srcObject) {
-        const tracks = (videoRef.current.srcObject as MediaStream).getTracks();
-        tracks.forEach(track => track.stop());
+        const stream = videoRef.current.srcObject as MediaStream;
+        stream.getTracks().forEach(track => track.stop());
       }
-      faceMeshRef.current?.close();
     };
   }, []);
 
   useEffect(() => {
-    if (videoRef.current && faceMeshRef.current) {
-      const processFrame = async () => {
-        if (videoRef.current && faceMeshRef.current) {
-          await faceMeshRef.current.send({ image: videoRef.current });
-        }
-        requestAnimationFrame(processFrame);
-      };
+    if (!faceMeshRef.current || !videoRef.current) return;
 
-      processFrame();
-    }
+    const animate = () => {
+      if (videoRef.current && faceMeshRef.current) {
+        faceMeshRef.current.send({ image: videoRef.current });
+      }
+      requestAnimationFrame(animate);
+    };
+
+    animate();
   }, []);
-
-  return trackingState;
 }; 
