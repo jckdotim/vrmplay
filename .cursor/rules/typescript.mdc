@@ -1,0 +1,26 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+---
+Description: TypeScript code style and formatting rules
+Globs: **/*.{ts,tsx}
+---
+
+# Code Style
+- Indentation: 2 spaces
+- Quotes: Single quotes
+- Semicolons: Required
+- Trailing commas: ES5 style
+- Max line length: 100 characters
+- Tab width: 2 spaces
+- Use spaces instead of tabs
+- Bracket spacing: Enabled
+- Arrow function parentheses: Omit for single parameter
+
+# TypeScript Settings
+- Enable strictNullChecks
+- Enable noImplicitAny
+- Maximize type inference usage
+- Encourage explicit type declarations

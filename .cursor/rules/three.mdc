@@ -1,0 +1,35 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+---
+Description: Three.js and React Three Fiber development rules
+Globs: **/*.{ts,tsx}
+---
+
+# Scene Settings
+- Do not use default camera
+- Use Canvas component
+- Default pixel ratio: 1
+
+# Performance Optimization
+- Use BVH
+- Utilize InstancedMesh
+- Use compressed textures
+
+# VRM Related
+- Utilize BlendShapes
+- Use SpringBone system
+- Enable LookAt functionality
+
+# Camera Settings
+- FOV: 50
+- Near: 0.1
+- Far: 1000
+
+# Control Settings
+- Enable damping
+- Damping Factor: 0.05
+- Enable zoom
+- Disable pan

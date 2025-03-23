@@ -1,0 +1,34 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+---
+Description: React component naming and structure rules
+Globs: **/*.tsx
+---
+
+# Naming Conventions
+- Components: PascalCase
+- File names: PascalCase
+- Props: camelCase
+- Custom hooks: use{Name}
+- Context: {Name}Context
+
+# Component Structure
+- Use functional components
+- Props type definitions required
+- Separate style files
+- Follow single responsibility principle
+
+# Import Order
+1. React related
+2. Three.js related
+3. React Three Fiber related
+4. Components
+5. Custom hooks
+6. Utilities
+7. Types
+8. Styles
+
+Add blank line between groups

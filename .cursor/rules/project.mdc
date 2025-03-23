@@ -1,0 +1,35 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+---
+Description: 3D Interactive Environment Project with VRM Character
+Globs: **/*
+---
+
+# Project Structure
+- src/
+  - components/: React components
+  - hooks/: Custom hooks
+  - utils/: Utility functions
+  - types/: Type definitions
+  - assets/: Static resources
+
+# Documentation
+- JSDoc comments required
+- Include code examples
+- Type definitions required
+
+# Testing
+- Test framework: Vitest
+- Coverage requirements:
+  - statements: 80%
+  - branches: 80%
+  - functions: 80%
+  - lines: 80%
+
+# Rule References
+- TypeScript rules: @file:.cursor/rules/typescript.mdc
+- React rules: @file:.cursor/rules/react.mdc
+- Three.js rules: @file:.cursor/rules/three.mdc

@@ -1,0 +1,34 @@
+{
+  "rules": {
+    "typescript": {
+      "indent": 2,
+      "quotes": "single",
+      "semi": true,
+      "trailingComma": "es5",
+      "printWidth": 100,
+      "tabWidth": 2,
+      "useTabs": false,
+      "bracketSpacing": true,
+      "arrowParens": "avoid"
+    },
+    "react": {
+      "componentNaming": "PascalCase",
+      "fileNaming": "PascalCase",
+      "propsNaming": "camelCase"
+    },
+    "imports": {
+      "order": [
+        "react",
+        "three",
+        "@react-three/fiber",
+        "@react-three/drei",
+        "components",
+        "hooks",
+        "utils",
+        "types",
+        "styles"
+      ],
+      "newlineBetweenGroups": true
+    }
+  }
+} 
