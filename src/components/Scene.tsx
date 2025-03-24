@@ -12,6 +12,54 @@ export const Scene = () => {
   const [vrm, setVrm] = useState<VRM | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const handleVRMLoad = useCallback(async (file: File) => {
+    try {
+      setLoading(true);
+      // Create object URL for the file
+      const url = URL.createObjectURL(file);
+      const vrmModel = await loadVRM(url);
+      
+      // Clean up previous VRM if exists
+      if (vrm) {
+        // Dispose only VRM-related resources
+        const disposeVRMMaterial = (material: THREE.Material) => {
+          if (material.name.includes('VRM') || !material.name) {
+            material.dispose();
+          }
+        };
+
+        vrm.scene.traverse((obj: THREE.Object3D) => {
+          if (obj instanceof THREE.Mesh) {
+            // Only dispose geometry if it's part of the VRM
+            if (obj.name.includes('VRM') || !obj.name) {
+              obj.geometry?.dispose();
+            }
+            
+            // Handle materials
+            if (obj.material) {
+              if (Array.isArray(obj.material)) {
+                obj.material.forEach(disposeVRMMaterial);
+              } else {
+                disposeVRMMaterial(obj.material);
+              }
+            }
+          }
+        });
+
+        // Remove VRM from scene
+        vrm.scene.parent?.remove(vrm.scene);
+      }
+      
+      setVrm(vrmModel);
+      // Clean up object URL
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error loading VRM:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [vrm]);
+
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -23,43 +71,11 @@ export const Scene = () => {
     if (!file) return;
 
     try {
-      setLoading(true);
       const url = URL.createObjectURL(file);
-      
-      // Clean up previous VRM if exists
-      if (vrm) {
-        const disposeVRMMaterial = (material: THREE.Material) => {
-          if (material.name.includes('VRM') || !material.name) {
-            material.dispose();
-          }
-        };
-
-        vrm.scene.traverse((obj: THREE.Object3D) => {
-          if (obj instanceof THREE.Mesh) {
-            if (obj.name.includes('VRM') || !obj.name) {
-              obj.geometry?.dispose();
-            }
-            
-            if (obj.material) {
-              if (Array.isArray(obj.material)) {
-                obj.material.forEach(disposeVRMMaterial);
-              } else {
-                disposeVRMMaterial(obj.material);
-              }
-            }
-          }
-        });
-
-        vrm.scene.parent?.remove(vrm.scene);
-      }
-
-      const vrmModel = await loadVRM(url) as VRM;
-      setVrm(vrmModel);
-      URL.revokeObjectURL(url);
+      const vrm = await loadVRM(url) as VRM;
+      setVrm(vrm);
     } catch (error) {
       console.error('Error loading VRM:', error);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -113,14 +129,16 @@ export const Scene = () => {
         {/* Lighting */}
         <ambientLight intensity={0.3} />
         <directionalLight
-          position={[10, 10, 10]}
-          intensity={2}
+          position={[5, 5, 5]}
+          intensity={0.5}
           castShadow
           shadow-mapSize-width={2048}
           shadow-mapSize-height={2048}
           shadow-camera-far={50}
-          shadow-camera-near={0.1}
-          shadow-bias={-0.0001}
+          shadow-camera-left={-10}
+          shadow-camera-right={10}
+          shadow-camera-top={10}
+          shadow-camera-bottom={-10}
         />
         
         {/* Ground Shadows */}

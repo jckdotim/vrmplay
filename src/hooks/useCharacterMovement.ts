@@ -78,10 +78,10 @@ export const useCharacterMovement = (initialPosition = [0, 0, 0]) => {
       cameraRight.crossVectors(new THREE.Vector3(0, 1, 0), cameraForward).normalize();
 
       // Calculate movement direction based on keys relative to camera
-      if (keys.has('w')) direction.add(cameraForward);
-      if (keys.has('s')) direction.sub(cameraForward);
-      if (keys.has('a')) direction.add(cameraRight);
-      if (keys.has('d')) direction.sub(cameraRight);
+      if (keys.has('w') || keys.has('ㅈ')) direction.add(cameraForward);
+      if (keys.has('s') || keys.has('ㄴ')) direction.sub(cameraForward);
+      if (keys.has('a') || keys.has('ㅁ')) direction.add(cameraRight);
+      if (keys.has('d') || keys.has('ㅇ')) direction.sub(cameraRight);
 
       // Normalize direction vector
       if (direction.lengthSq() > 0) {
