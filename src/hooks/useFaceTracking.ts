@@ -41,9 +41,9 @@ export const useFaceTracking = (vrm: VRM | null) => {
       };
 
       // Update VRM rotation
-      vrm.rotation.y = faceDirection.x * Math.PI;
-      vrm.rotation.x = faceDirection.y * Math.PI;
-      vrm.rotation.z = faceDirection.z * Math.PI;
+      vrm.scene.rotation.y = faceDirection.x * Math.PI;
+      vrm.scene.rotation.x = faceDirection.y * Math.PI;
+      vrm.scene.rotation.z = faceDirection.z * Math.PI;
 
       // Update VRM eye rotation
       const eyeRotation = {

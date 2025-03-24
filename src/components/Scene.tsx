@@ -65,17 +65,19 @@ export const Scene = () => {
     e.stopPropagation();
   }, []);
 
-  const handleDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    const file = e.dataTransfer.files[0];
-    if (file && file.name.toLowerCase().endsWith('.vrm')) {
-      handleVRMLoad(file);
-    } else {
-      console.warn('Please drop a VRM file');
+  const handleDrop = async (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    const file = event.dataTransfer.files[0];
+    if (!file) return;
+
+    try {
+      const url = URL.createObjectURL(file);
+      const vrm = await loadVRM(url) as VRM;
+      setVrm(vrm);
+    } catch (error) {
+      console.error('Error loading VRM:', error);
     }
-  }, [handleVRMLoad]);
+  };
 
   useEffect(() => {
     const loadCharacter = async () => {
