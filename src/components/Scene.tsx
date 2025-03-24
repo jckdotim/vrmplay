@@ -4,61 +4,12 @@ import { Terrain } from './Terrain';
 import { Character } from './Character';
 import { useEffect, useState, useCallback } from 'react';
 import { loadVRM } from '../utils/vrmLoader';
-import * as THREE from 'three';
 import { VRM } from '@pixiv/three-vrm';
 import { CAMERA_CONFIG } from '../constants/camera';
 
 export const Scene = () => {
   const [vrm, setVrm] = useState<VRM | null>(null);
   const [loading, setLoading] = useState(true);
-
-  const handleVRMLoad = useCallback(async (file: File) => {
-    try {
-      setLoading(true);
-      // Create object URL for the file
-      const url = URL.createObjectURL(file);
-      const vrmModel = await loadVRM(url);
-      
-      // Clean up previous VRM if exists
-      if (vrm) {
-        // Dispose only VRM-related resources
-        const disposeVRMMaterial = (material: THREE.Material) => {
-          if (material.name.includes('VRM') || !material.name) {
-            material.dispose();
-          }
-        };
-
-        vrm.scene.traverse((obj: THREE.Object3D) => {
-          if (obj instanceof THREE.Mesh) {
-            // Only dispose geometry if it's part of the VRM
-            if (obj.name.includes('VRM') || !obj.name) {
-              obj.geometry?.dispose();
-            }
-            
-            // Handle materials
-            if (obj.material) {
-              if (Array.isArray(obj.material)) {
-                obj.material.forEach(disposeVRMMaterial);
-              } else {
-                disposeVRMMaterial(obj.material);
-              }
-            }
-          }
-        });
-
-        // Remove VRM from scene
-        vrm.scene.parent?.remove(vrm.scene);
-      }
-      
-      setVrm(vrmModel);
-      // Clean up object URL
-      URL.revokeObjectURL(url);
-    } catch (error) {
-      console.error('Error loading VRM:', error);
-    } finally {
-      setLoading(false);
-    }
-  }, [vrm]);
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
